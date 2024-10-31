@@ -8,7 +8,22 @@
         upgrade: dist
         update_cache: yes
 
+    - name: Debug reboot requirement
+      debug:
+        msg: "Reboot required: {{ ansible_reboot_required }}"
+
     - name: Reboot if needed
       reboot:
         reboot_timeout: 60
       when: ansible_reboot_required | bool
+      ignore_errors: yes
+
+    - name: Check reboot status
+      command: last reboot
+      register: reboot_status
+      failed_when: "reboot" not in reboot_status.stdout
+
+    - name: Notify on reboot failure
+      fail:
+        msg: "Reboot failed. Please check system logs."
+      when: reboot_status.rc != 0
