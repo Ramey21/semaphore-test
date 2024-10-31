@@ -1,6 +1,6 @@
 ---
 - name: Perform dist-upgrade and reboot if needed
-  hosts: ubuntu_servers
+  hosts: all
   become: true
   tasks:
     - name: Update the package index
