@@ -1,0 +1,14 @@
+- name: Upgrade and Reboot
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Upgrade system packages
+      apt:
+        upgrade: dist
+        update_cache: yes
+
+    - name: Reboot if needed
+      reboot:
+        reboot_timeout: 60
+      when: ansible_reboot_required | bool
