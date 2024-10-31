@@ -1,3 +1,4 @@
+---
 - name: Upgrade and Reboot
   hosts: all
   become: yes
