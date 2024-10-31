@@ -1,29 +1,22 @@
-- name: Upgrade and Reboot
-  hosts: all
-  become: yes
-
+---
+- name: Perform dist-upgrade and reboot if needed
+  hosts: ubuntu_servers
+  become: true
   tasks:
-    - name: Upgrade system packages
-      apt:
-        upgrade: dist
+    - name: Update the package index
+      ansible.builtin.apt:
         update_cache: yes
 
-    - name: Debug reboot requirement
-      debug:
-        msg: "Reboot required: {{ ansible_reboot_required }}"
+    - name: Perform dist-upgrade
+      ansible.builtin.apt:
+        upgrade: dist
+      register: upgrade_result
 
-    - name: Reboot if needed
-      reboot:
-        reboot_timeout: 60
-      when: ansible_reboot_required | bool
-      ignore_errors: yes
+    - name: Check if a reboot is required
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required
 
-    - name: Check reboot status
-      command: last reboot
-      register: reboot_status
-      failed_when: "reboot" not in reboot_status.stdout
-
-    - name: Notify on reboot failure
-      fail:
-        msg: "Reboot failed. Please check system logs."
-      when: reboot_status.rc != 0
+    - name: Reboot the server if a reboot is required
+      ansible.builtin.reboot:
+      when: reboot_required.stat.exists
