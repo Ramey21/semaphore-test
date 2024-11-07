@@ -6,12 +6,14 @@
   vars:
     devops_password: "{{ 'P@ssword' | password_hash('sha512') }}"  # Encrypts the password
     devops_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDGMA18zoj/uahp+ObShEySRjUizCFvANchfvBvtJi5EZYK408HQ4ab/ISxpR+yKP3HKm9L4iYe8rA6tOKlS7jA8asJdpXoNdegR47A2d1DtyGNml8NvU1N4ArjLRSNcUDBtx8PqnOWVfvKGcpjRYN5PdPSphtpaKAheHDNXfhbs0H1F1KHjbcGKVb7p4I8CaGhPnPPIxo0YozhTsnjNLmrvGC9nyyOpFBhH1/QzcctHcdk45ZgpYkHdkMJKhe9i18zyKVe0hv3hYreBANhAx6+paxO2yW9HvHbDD1aEmeE+SuUvG/YtkzvfQh8BQwGFqPrCq0hMxf3fQ4vDb/d9lMSqy0+dHKzx+0BzrEnvDYC+FYVvtTQlVZy0jy8PuZRSeoQrSBDtHytqKqpguZ7inlf2jlmCYJlGXVPvCISCXbAN7bAwLXWg2eiJRoRzKy84LyyDBq0sOctaMhhNsNW+NfUBC4p/joKzc8ENzbsw3RkLeoYDMRvS7PJcnhFvoDubC0= root@ansible-srvr"  # Replace with your actual SSH public key
+    devops_shell: "/bin/bash"  # Specify the default shell here
 
   tasks:
     - name: Ensure the devops user is present
       ansible.builtin.user:
         name: devops
         password: "{{ devops_password }}"
+        shell: "{{ devops_shell }}"  # Set the default shell
         state: present
 
     - name: Add devops user to sudo group
@@ -35,3 +37,10 @@
         owner: devops
         group: devops
         mode: '0600'  # Sets permissions to read/write for owner only
+
+    - name: Allow devops user passwordless sudo
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers.d/devops
+        create: yes  # Creates the file if it does not exist
+        line: "devops ALL=(ALL) NOPASSWD: ALL"
+        mode: '0440'  # Sets permissions for sudoers files
