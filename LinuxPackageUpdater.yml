@@ -1,17 +1,41 @@
 ---
-- name: Update packages on Ubuntu and AlmaLinux
+- name: Update non-core and non-kernel packages on Ubuntu and AlmaLinux
   hosts: all  # Replace with your target server group or IP in the Ansible inventory
   become: yes  # Allows Ansible to run tasks with elevated privileges
 
   tasks:
-    - name: Update package cache and upgrade packages on Ubuntu
+    - name: Update non-core and non-kernel packages on Ubuntu
       ansible.builtin.apt:
         update_cache: yes
-        upgrade: yes
+        upgrade: dist
+        autoremove: yes
+      when: ansible_os_family == "Debian"
+      register: apt_upgrade_result
+
+    - name: Exclude kernel updates on Ubuntu
+      ansible.builtin.shell: |
+        apt-mark hold linux-generic linux-headers-generic linux-image-generic
       when: ansible_os_family == "Debian"
 
-    - name: Update packages on AlmaLinux
+    - name: Update non-core and non-kernel packages on AlmaLinux
       ansible.builtin.dnf:
         name: "*"
+        exclude: "kernel*,centos*,almalinux*,redhat*"
         state: latest
+      when: ansible_os_family == "RedHat"
+      register: dnf_upgrade_result
+
+    - name: Unhold kernel packages on Ubuntu after update
+      ansible.builtin.shell: |
+        apt-mark unhold linux-generic linux-headers-generic linux-image-generic
+      when: ansible_os_family == "Debian"
+
+    - name: Display packages that were updated on Ubuntu
+      ansible.builtin.debug:
+        var: apt_upgrade_result
+      when: ansible_os_family == "Debian"
+
+    - name: Display packages that were updated on AlmaLinux
+      ansible.builtin.debug:
+        var: dnf_upgrade_result
       when: ansible_os_family == "RedHat"
