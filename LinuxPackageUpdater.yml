@@ -1,10 +1,17 @@
 ---
-- hosts: all
-
-  become: true
+- name: Update packages on Ubuntu and AlmaLinux
+  hosts: all  # Replace with your target server group or IP in the Ansible inventory
+  become: yes  # Allows Ansible to run tasks with elevated privileges
 
   tasks:
-    - name: APT Package Updater
-      apt:
-        upgrade: yes
+    - name: Update package cache and upgrade packages on Ubuntu
+      ansible.builtin.apt:
         update_cache: yes
+        upgrade: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Update packages on AlmaLinux
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "RedHat"
