@@ -1,5 +1,5 @@
 ---
-- name: Create devops user with sudo privileges, setup SSH directory, and add public key
+- name: Create devops user with sudo privileges, setup SSH directory, add public key, and allow passwordless sudo
   hosts: all  # Replace with your target server group or IP in the Ansible inventory
   become: yes  # Allows Ansible to run tasks with elevated privileges
 
@@ -9,18 +9,27 @@
     devops_shell: "/bin/bash"  # Specify the default shell here
 
   tasks:
-    - name: Ensure the devops user is present
+    - name: Ensure the devops user is present on Ubuntu and AlmaLinux
       ansible.builtin.user:
         name: devops
         password: "{{ devops_password }}"
         shell: "{{ devops_shell }}"  # Set the default shell
         state: present
+      when: ansible_os_family in ['Debian', 'RedHat']  # This covers Ubuntu (Debian) and AlmaLinux (RedHat)
 
-    - name: Add devops user to sudo group
+    - name: Add devops user to sudo group on Ubuntu
       ansible.builtin.user:
         name: devops
         groups: sudo
-        append: yes  # Ensures user is added to the group without removing other groups
+        append: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Add devops user to wheel group on AlmaLinux
+      ansible.builtin.user:
+        name: devops
+        groups: wheel
+        append: yes
+      when: ansible_os_family == 'RedHat'
 
     - name: Create .ssh directory for devops user
       ansible.builtin.file:
@@ -38,9 +47,18 @@
         group: devops
         mode: '0600'  # Sets permissions to read/write for owner only
 
-    - name: Allow devops user passwordless sudo
+    - name: Allow devops user passwordless sudo on Ubuntu
       ansible.builtin.lineinfile:
         path: /etc/sudoers.d/devops
-        create: yes  # Creates the file if it does not exist
+        create: yes
         line: "devops ALL=(ALL) NOPASSWD: ALL"
-        mode: '0440'  # Sets permissions for sudoers files
+        mode: '0440'
+      when: ansible_os_family == 'Debian'
+
+    - name: Allow devops user passwordless sudo on AlmaLinux
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers.d/devops
+        create: yes
+        line: "devops ALL=(ALL) NOPASSWD: ALL"
+        mode: '0440'
+      when: ansible_os_family == 'RedHat'
