@@ -1,0 +1,56 @@
+---
+- name: Full upgrade including core and kernel packages, with reboot if needed
+  hosts: all  # Replace with your target server group or IP in the Ansible inventory
+  become: yes  # Allows Ansible to run tasks with elevated privileges
+
+  tasks:
+    - name: Update and upgrade all packages on Ubuntu (including kernel)
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+        autoremove: yes
+      when: ansible_os_family == "Debian"
+      register: apt_upgrade_result
+
+    - name: Update and upgrade all packages on AlmaLinux (including kernel)
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "RedHat"
+      register: dnf_upgrade_result
+
+    - name: Check if yum-utils is installed on AlmaLinux
+      ansible.builtin.dnf:
+        name: yum-utils
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Check if reboot is needed on Ubuntu
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      when: ansible_os_family == "Debian"
+      register: ubuntu_reboot_required
+
+    - name: Check if reboot is needed on AlmaLinux (using needs-restarting)
+      ansible.builtin.command: needs-restarting -r
+      when: ansible_os_family == "RedHat"
+      register: almalinux_reboot_required
+      failed_when: almalinux_reboot_required.rc not in [0, 1]  # Only fails if command error, not if reboot required
+
+    - name: Reboot Ubuntu if needed
+      ansible.builtin.reboot:
+      when: ansible_os_family == "Debian" and ubuntu_reboot_required.stat.exists
+
+    - name: Reboot AlmaLinux if needed
+      ansible.builtin.reboot:
+      when: ansible_os_family == "RedHat" and almalinux_reboot_required.rc == 1
+
+    - name: Display packages that were updated on Ubuntu
+      ansible.builtin.debug:
+        var: apt_upgrade_result
+      when: ansible_os_family == "Debian"
+
+    - name: Display packages that were updated on AlmaLinux
+      ansible.builtin.debug:
+        var: dnf_upgrade_result
+      when: ansible_os_family == "RedHat"
