@@ -1,6 +1,6 @@
 ---
 - name: Create devops user with sudo privileges, setup SSH directory, and add public key
-  hosts: ubuntu_server  # Replace with your target server group or IP in the Ansible inventory
+  hosts: all  # Replace with your target server group or IP in the Ansible inventory
   become: yes  # Allows Ansible to run tasks with elevated privileges
 
   vars:
