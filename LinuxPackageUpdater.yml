@@ -8,6 +8,3 @@
       apt:
         upgrade: yes
         update_cache: yes
-      ignore_errors: True
-      async: 60
-      poll: 60
