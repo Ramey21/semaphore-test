@@ -1,0 +1,21 @@
+- name: Ping IP Address 5 Times
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Ping the IP Address
+      shell: "ping -c 5 192.168.2.1"
+      register: ping_result
+      args:
+        executable: /bin/bash
+
+    - name: Check Ping Result
+      debug:
+        msg: "Ping result: {{ ping_result.stdout }}"
+
+      when: ping_result.rc == 0
+      
+    - name: Ping Failed
+      debug:
+        msg: "Ping failed!"
+      when: ping_result.rc != 0
