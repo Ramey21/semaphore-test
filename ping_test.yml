@@ -19,3 +19,11 @@
       debug:
         msg: "Ping failed!"
       when: ping_result.rc != 0
+
+    - name: Notify Gotify - Success
+      command: "/usr/local/bin/notify_gotify.sh 'Task completed successfully' 5"
+      when: ansible_success
+
+    - name: Notify Gotify - Failure
+      command: "/usr/local/bin/notify_gotify.sh 'Task failed to complete' 10"
+      when: ansible_failed
