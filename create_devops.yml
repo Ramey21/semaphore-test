@@ -64,4 +64,4 @@
       when: ansible_os_family == 'RedHat'
 
     - name: Notify Gotify
-      command: "/usr/local/bin/notify_gotify.sh 'Task completed' 5"
+      command: /usr/local/bin/notify_gotify.sh 'Task completed' 5
