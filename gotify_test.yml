@@ -1,0 +1,11 @@
+- name: Execute some task
+  debug:
+    msg: "Running some task..."
+
+- name: Notify Gotify - Success
+  command: "/usr/local/bin/notify_gotify.sh 'Task completed successfully' 5"
+  when: ansible_success
+
+- name: Notify Gotify - Failure
+  command: "/usr/local/bin/notify_gotify.sh 'Task failed to complete' 10"
+  when: ansible_failed
