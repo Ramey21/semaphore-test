@@ -62,6 +62,3 @@
         line: "devops ALL=(ALL) NOPASSWD: ALL"
         mode: '0440'
       when: ansible_os_family == 'RedHat'
-
-    - name: Notify Gotify
-      command: /usr/local/bin/notify_gotify.sh 'Task completed' 5
