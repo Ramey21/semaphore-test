@@ -1,9 +1,18 @@
 ---
-- name: Update non-core and non-kernel packages on Ubuntu and AlmaLinux
+- name: Ping and update non-core and non-kernel packages on Ubuntu and AlmaLinux
   hosts: all  # Replace with your target server group or IP in the Ansible inventory
   become: yes  # Allows Ansible to run tasks with elevated privileges
 
   tasks:
+    - name: Ping each endpoint to check if it is online
+      ansible.builtin.ping:
+      register: ping_result
+      failed_when: ping_result.ping != "pong"
+
+    - name: Skip the host if it is unreachable
+      meta: end_host
+      when: ping_result.ping != "pong"
+
     - name: Update non-core and non-kernel packages on Ubuntu
       ansible.builtin.apt:
         update_cache: yes
