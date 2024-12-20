@@ -1,0 +1,73 @@
+---
+- name: Check device status and manage Check-MK Agent Async Service
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ping the device to ensure it's reachable
+      ansible.builtin.ping:
+      register: ping_result
+      failed_when: ping_result.ping != "pong"
+
+    - name: Stop playbook if device is unreachable
+      meta: end_host
+      when: ping_result.ping != "pong"
+
+    - name: Check if check-mk-agent-async.service is running
+      ansible.builtin.systemd:
+        name: check-mk-agent-async.service
+        state: started
+      register: service_status
+      failed_when: false
+
+    - name: Take action for Ubuntu if the service is not running
+      block:
+        - name: Download the Check-MK agent package for Ubuntu
+          ansible.builtin.get_url:
+            url: https://checkmk.htown5711.duckdns.org/monitoring/check_mk/agents/check-mk-agent_2.3.0p23-1_all.deb
+            dest: /tmp/check-mk-agent_2.3.0p23-1_all.deb
+            mode: '0644'
+
+        - name: Install the Check-MK agent package on Ubuntu
+          ansible.builtin.apt:
+            deb: /tmp/check-mk-agent_2.3.0p23-1_all.deb
+            update_cache: yes
+
+        - name: Start and enable check-mk-agent-async.service on Ubuntu
+          ansible.builtin.systemd:
+            name: check-mk-agent-async.service
+            state: started
+            enabled: yes
+      when:
+        - ansible_os_family == "Debian"
+        - service_status.status.ActiveState != 'active'
+
+    - name: Take action for AlmaLinux if the service is not running
+      block:
+        - name: Download the Check-MK agent package for AlmaLinux
+          ansible.builtin.get_url:
+            url: https://checkmk.htown5711.duckdns.org/monitoring/check_mk/agents/check-mk-agent-2.3.0p23-1.noarch.rpm
+            dest: /tmp/check-mk-agent-2.3.0p23-1.noarch.rpm
+            mode: '0644'
+
+        - name: Install the Check-MK agent package on AlmaLinux
+          ansible.builtin.yum:
+            name: /tmp/check-mk-agent-2.3.0p23-1.noarch.rpm
+            state: present
+
+        - name: Start and enable check-mk-agent-async.service on AlmaLinux
+          ansible.builtin.systemd:
+            name: check-mk-agent-async.service
+            state: started
+            enabled: yes
+      when:
+        - ansible_os_family == "RedHat"
+        - service_status.status.ActiveState != 'active'
+
+    - name: Display result
+      debug:
+        msg: >
+          {% if service_status.status.ActiveState == 'active' %}
+          The check-mk-agent-async.service is already running. No action was taken.
+          {% else %}
+          The check-mk-agent-async.service was not running. The appropriate package was installed and the service started.
+          {% endif %}
