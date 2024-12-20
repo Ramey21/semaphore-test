@@ -1,10 +1,10 @@
 ---
 - name: Ping and update non-core and non-kernel packages on Ubuntu and AlmaLinux
-  hosts: all  # Replace with your target server group or IP in the Ansible inventory
-  become: yes  # Allows Ansible to run tasks with elevated privileges
+  hosts: all  # Replace with your target group or hosts in the inventory
+  become: yes  # Run tasks with elevated privileges
 
   tasks:
-    - name: Ping each endpoint to check if it is online
+    - name: Ping each device to check if it is online
       ansible.builtin.ping:
       register: ping_result
       failed_when: ping_result.ping != "pong"
@@ -19,9 +19,8 @@
         upgrade: dist
         autoremove: yes
       when: ansible_os_family == "Debian"
-      register: apt_upgrade_result
 
-    - name: Exclude kernel updates on Ubuntu
+    - name: Hold kernel packages on Ubuntu
       ansible.builtin.shell: |
         apt-mark hold linux-generic linux-headers-generic linux-image-generic
       when: ansible_os_family == "Debian"
@@ -32,19 +31,8 @@
         exclude: "kernel*,centos*,almalinux*,redhat*"
         state: latest
       when: ansible_os_family == "RedHat"
-      register: dnf_upgrade_result
 
     - name: Unhold kernel packages on Ubuntu after update
       ansible.builtin.shell: |
         apt-mark unhold linux-generic linux-headers-generic linux-image-generic
       when: ansible_os_family == "Debian"
-
-    - name: Display packages that were updated on Ubuntu
-      ansible.builtin.debug:
-        var: apt_upgrade_result
-      when: ansible_os_family == "Debian"
-
-    - name: Display packages that were updated on AlmaLinux
-      ansible.builtin.debug:
-        var: dnf_upgrade_result
-      when: ansible_os_family == "RedHat"
