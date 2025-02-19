@@ -1,5 +1,6 @@
 - name: Check for updates on all servers
   hosts: all
+  become: yes
   gather_facts: yes
   tasks:
     - name: Ubuntu - List available updates
