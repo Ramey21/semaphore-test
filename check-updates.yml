@@ -1,3 +1,4 @@
+---
 - name: Check for updates on all servers
   hosts: all
   gather_facts: yes
@@ -28,10 +29,11 @@
         path: /tmp/update_report.txt
         line: "{{ updates_report }}"
         create: yes
-        mode: '0644'  # Ensure it's readable by all users
+        mode: '0644'
 
 - name: Send email with update report
   hosts: localhost
+  connection: local  # <--- Crucial: Add the local connection
   become: yes
   tasks:
     - name: Send email
