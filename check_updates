@@ -1,0 +1,40 @@
+- name: Check for updates on all servers
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Ubuntu - List available updates
+      shell: apt list --upgradable 2>/dev/null | tail -n +2
+      register: ubuntu_updates
+      when: ansible_os_family == "Debian"
+
+    - name: AlmaLinux - List available updates
+      shell: dnf list updates -q
+      register: almalinux_updates
+      when: ansible_os_family == "RedHat"
+
+    - name: Collect update results
+      set_fact:
+        updates_report: |
+          Server: {{ inventory_hostname }}
+          {% if ansible_os_family == "Debian" %}
+          {{ ubuntu_updates.stdout }}
+          {% elif ansible_os_family == "RedHat" %}
+          {{ almalinux_updates.stdout }}
+          {% endif %}
+
+    - name: Save update info for email
+      lineinfile:
+        path: /tmp/update_report.txt
+        line: "{{ updates_report }}"
+        create: yes
+        mode: '0644'
+
+- name: Send email with update report
+  hosts: localhost
+  tasks:
+    - name: Send email
+      mail:
+        to: "netadmin@htown5711.duckdns.org"
+        subject: "Update Report for All Servers"
+        body: "{{ lookup('file', '/tmp/update_report.txt') }}"
+        from: "semaphore@example.com"
