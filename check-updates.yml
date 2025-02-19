@@ -23,6 +23,7 @@
           {% endif %}
 
 - name: Save update info for email
+  become: yes
   lineinfile:
     path: /tmp/update_report.txt
     line: "{{ updates_report }}"
