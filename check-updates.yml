@@ -13,9 +13,9 @@
       register: almalinux_updates
       when: ansible_os_family == "RedHat"
 
-    - name: Collect update results
+    - name: Collect update results (per server)
       set_fact:
-        updates_report: |
+        server_report: |
           Server: {{ inventory_hostname }}
           {% if ansible_os_family == "Debian" %}
           {{ ubuntu_updates.stdout }}
@@ -23,17 +23,21 @@
           {{ almalinux_updates.stdout }}
           {% endif %}
 
-    - name: Save update info for email
+    - name: Add server report to aggregate report (using the `delegate_to` and `run_once` directives)
+      delegate_to: localhost # Run this task on the control node
+      run_once: true # Only run it once
       become: yes
-      lineinfile:
+      blockinfile:
         path: /tmp/update_report.txt
-        line: "{{ updates_report }}"
         create: yes
-        mode: '0644'
+        block: |
+          {% for host in groups['all'] %}
+          {{ hostvars[host].server_report }}
+          {% endfor %}
 
 - name: Send email with update report
   hosts: localhost
-  connection: local  # <--- Crucial: Add the local connection
+  connection: local
   become: yes
   tasks:
     - name: Send email
