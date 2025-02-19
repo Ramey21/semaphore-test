@@ -1,0 +1,50 @@
+- name: Apply updates and reboot if needed
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ubuntu - Apply updates
+      apt:
+        upgrade: dist
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: AlmaLinux - Apply updates
+      dnf:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "RedHat"
+
+    - name: Check if reboot is needed (Ubuntu)
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_file
+      when: ansible_os_family == "Debian"
+
+    - name: Check if reboot is needed (AlmaLinux)
+      command: needs-restarting -r
+      register: reboot_check
+      failed_when: false
+      changed_when: false
+      when: ansible_os_family == "RedHat"
+
+    - name: Set reboot flag
+      set_fact:
+        needs_reboot: "{{ reboot_file.stat.exists | default(false) or reboot_check.rc == 1 | default(false) }}"
+
+    - name: Reboot if needed
+      reboot:
+      when: needs_reboot
+
+    - name: Save update results
+      shell: echo "Server: {{ inventory_hostname }} - Updates applied. Rebooted: {{ needs_reboot }}" >> /tmp/update_report_apply.txt
+      changed_when: false
+
+- name: Send email with update summary
+  hosts: localhost
+  tasks:
+    - name: Send email
+      mail:
+        to: "netadmin@htown5711.duckdns.org"
+        subject: "Update Summary for All Servers"
+        body: "{{ lookup('file', '/tmp/update_report_apply.txt') }}"
+        from: "semaphore@example.com"
