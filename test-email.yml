@@ -1,0 +1,9 @@
+- name: Test email sending
+  hosts: localhost
+  tasks:
+    - name: Send test email
+      mail:
+        to: "netadmin@htown5711.duckdns.org"
+        subject: "Test Email"
+        body: "This is a test email from Ansible"
+        from: "semaphore@htown5711.duckdns.org"
