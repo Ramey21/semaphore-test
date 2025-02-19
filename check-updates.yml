@@ -1,6 +1,5 @@
 - name: Check for updates on all servers
   hosts: all
-  become: yes
   gather_facts: yes
   tasks:
     - name: Ubuntu - List available updates
@@ -32,6 +31,7 @@
 
 - name: Send email with update report
   hosts: localhost
+  become: yes
   tasks:
     - name: Send email
       mail:
