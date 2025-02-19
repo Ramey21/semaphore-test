@@ -37,4 +37,4 @@
         to: "netadmin@htown5711.duckdns.org"
         subject: "Update Report for All Servers"
         body: "{{ lookup('file', '/tmp/update_report.txt') }}"
-        from: "semaphore@example.com"
+        from: "semaphore@htown5711.duckdns.org"
