@@ -22,12 +22,12 @@
           {{ almalinux_updates.stdout }}
           {% endif %}
 
-    - name: Save update info for email
-      lineinfile:
-        path: /tmp/update_report.txt
-        line: "{{ updates_report }}"
-        create: yes
-        mode: '0644'
+- name: Save update info for email
+  lineinfile:
+    path: /tmp/update_report.txt
+    line: "{{ updates_report }}"
+    create: yes
+    mode: '0644'  # Ensure it's readable by all users
 
 - name: Send email with update report
   hosts: localhost
