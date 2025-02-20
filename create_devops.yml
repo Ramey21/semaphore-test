@@ -5,7 +5,7 @@
 
   vars:
     devops_password: "{{ 'P@ssword' | password_hash('sha512') }}"  # Encrypts the password
-    devops_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDGMA18zoj/uahp+ObShEySRjUizCFvANchfvBvtJi5EZYK408HQ4ab/ISxpR+yKP3HKm9L4iYe8rA6tOKlS7jA8asJdpXoNdegR47A2d1DtyGNml8NvU1N4ArjLRSNcUDBtx8PqnOWVfvKGcpjRYN5PdPSphtpaKAheHDNXfhbs0H1F1KHjbcGKVb7p4I8CaGhPnPPIxo0YozhTsnjNLmrvGC9nyyOpFBhH1/QzcctHcdk45ZgpYkHdkMJKhe9i18zyKVe0hv3hYreBANhAx6+paxO2yW9HvHbDD1aEmeE+SuUvG/YtkzvfQh8BQwGFqPrCq0hMxf3fQ4vDb/d9lMSqy0+dHKzx+0BzrEnvDYC+FYVvtTQlVZy0jy8PuZRSeoQrSBDtHytqKqpguZ7inlf2jlmCYJlGXVPvCISCXbAN7bAwLXWg2eiJRoRzKy84LyyDBq0sOctaMhhNsNW+NfUBC4p/joKzc8ENzbsw3RkLeoYDMRvS7PJcnhFvoDubC0= root@ansible-srvr"  # Replace with your actual SSH public key
+    devops_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCod3mPDicT5Lu8s/BDi+xWRgMBZdcdk6jMCbfu+BN5CFhbR6aY82r3xz07FMBG3UZIiFdXij5A1UjbpINf+PWGTf83u3Q2CvJs4eMeAgTjkSnQy3cl/WzoUAbjgZF0iqFumNuZx4tGLgBXcm6VV8Vn9fssPaLRUAK8x45k7MNwCASD81HS/UiP7oA/l5Rwp/2iKicC6SVzHHvrmBy1MKcB9sqE/G8tNaQ7pvGOvwkM6aAvt50KUQN4kU0271UG/RT31N05yIrsT6TMpKmDTsxasVhmNbrdmWUu90951eSqv94eXxEEUi7hUiYEFdf/qd6aQI9xhakHkyey8Jjo7fcpiKuyw46/CdPXfiIGknXaUDVS2w9IkvaEcgPHOgOsqyGxNNkilMW7Pi5OXtaMiihUvX9kC2//f+FBJtIhk0NpZL521L/5HYovXnQ7NTwTcMI+q6gqtL68waneI43/SPLkiwly59RWaFPyGgkIw5NlMr4IXei+aLOXfnzSBGbclbyEBn98XGfK8mLIVrsuamF3cG1ksB1Vy+vhSkRb05EB5BUtaOvpWyw2gNHx1YbsjGkGAnhU/ZNQxEYmlz84Z2cI3g104xKoxLQ2j8T35Y/+SGGJnNX+tDOkr8f8VeZuddBY71Ki0BkJydNpuUKT3cPjxt/MHdHO5WTcm2v45rke5w== admin1@ansible-srvr"  # Replace with your actual SSH public key
     devops_shell: "/bin/bash"  # Specify the default shell here
 
   tasks:
