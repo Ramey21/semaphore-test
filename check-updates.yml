@@ -27,10 +27,10 @@
   hosts: localhost
   connection: local
   tasks:
-    - name: Gather server reports  # Simplified with Jinja2
+    - name: Gather server reports
       set_fact:
-        all_reports: "{{ groups['all'] | map('extract', hostvars) | map('attribute', 'server_report') | join('\n') }}"
-
+        all_reports: "{{ groups['all'] | map('extract', hostvars) | map(attribute='server_report') | join('\n') }}"
+        
     - name: Create update report file
       blockinfile:
         path: /tmp/update_reports/update_report.txt  # Or reports/update_report.txt if 'reports' dir exists in your playbook's dir
