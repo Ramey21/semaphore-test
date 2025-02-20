@@ -38,7 +38,6 @@
 - name: Send email with update report
   hosts: localhost
   connection: local
-  become: yes
   tasks:
     - name: Send email
       mail:
