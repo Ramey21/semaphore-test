@@ -23,24 +23,24 @@
           {{ almalinux_updates.stdout }}
           {% endif %}
 
-    - name: Add server report to aggregate report (using the `delegate_to` and `run_once` directives)
-      delegate_to: localhost # Run this task on the control node
-      run_once: true # Only run it once
-      blockinfile:
-        path: /tmp/update_reports/update_report.txt
-        create: yes
-        block: |
-          {% for host in groups['all'] %}
-          {{ hostvars[host].server_report }}
-          {% endfor %}
-
-- name: Send email with update report
+- name: Create update report and send email  # Combined play
   hosts: localhost
   connection: local
+  become: yes  # Needed for file writing and email (if mail server requires authentication)
   tasks:
+    - name: Gather server reports  # Simplified with Jinja2
+      set_fact:
+        all_reports: "{{ groups['all'] | map('extract', hostvars) | map('attribute', 'server_report') | join('\n') }}"
+
+    - name: Create update report file
+      blockinfile:
+        path: /tmp/update_reports/update_report.txt  # Or reports/update_report.txt if 'reports' dir exists in your playbook's dir
+        create: yes
+        block: "{{ all_reports }}"
+
     - name: Send email
       mail:
         to: "netadmin@htown5711.duckdns.org"
         subject: "Update Report for All Servers"
-        body: "{{ lookup('file', '/tmp/update_report.txt') }}"
+        body: "{{ lookup('file', '/tmp/update_reports/update_report.txt') }}"  # Or reports/update_report.txt
         from: "semaphore@htown5711.duckdns.org"
