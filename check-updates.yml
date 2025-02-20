@@ -28,7 +28,7 @@
       run_once: true # Only run it once
       become: yes
       blockinfile:
-        path: /tmp/update_report.txt
+        path: /tmp/update_reports/update_report.txt
         create: yes
         block: |
           {% for host in groups['all'] %}
