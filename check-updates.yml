@@ -26,7 +26,6 @@
 - name: Create update report and send email  # Combined play
   hosts: localhost
   connection: local
-  become: yes  # Needed for file writing and email (if mail server requires authentication)
   tasks:
     - name: Gather server reports  # Simplified with Jinja2
       set_fact:
