@@ -26,7 +26,6 @@
     - name: Add server report to aggregate report (using the `delegate_to` and `run_once` directives)
       delegate_to: localhost # Run this task on the control node
       run_once: true # Only run it once
-      become: yes
       blockinfile:
         path: /tmp/update_reports/update_report.txt
         create: yes
